@@ -26,6 +26,7 @@ public class UserDataPanel
     
     private static string[] _userInputId = new string[6] { "", "", "", "", "", ""};
     
+    
     public static void OnGUI()
     {
         GUILayout.Label($"User Info", MainGUI.Style.Title);
@@ -74,6 +75,11 @@ public class UserDataPanel
         if (GUILayout.Button("2P", MainGUI.Style.Button)) User.ExportBackupData(1);
         GUILayout.EndHorizontal();
         
+        GUILayout.Label("Export Game Data", MainGUI.Style.Title);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Export Collections ID", MainGUI.Style.Button)) GameDataExtractor.ExtractAllCollectionIds();
+        if (GUILayout.Button("Export Songs ID", MainGUI.Style.Button)) GameDataExtractor.ExtractAllMusicInfo();
+        GUILayout.EndHorizontal();
     }
 
     private static void AddCollections(long index, CollectionType type, string input)
