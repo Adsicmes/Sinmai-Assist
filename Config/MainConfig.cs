@@ -10,6 +10,7 @@ public class MainConfig
     public class CommonConfig
     {
         public UnityLoggerConfig UnityLogger { get; set; } = new UnityLoggerConfig();
+        public bool AutoBackupData { get; set; } = false;
         public bool InfinityTimer { get; set; } = false;
         public bool InfinityTimerLegacy { get; set; } = false;
         public bool DisableMask { get; set; } = false;
@@ -55,6 +56,8 @@ public class MainConfig
         public bool DisableEnvironmentCheck { get; set; } = true;
         public bool DisableEncryption { get; set; } = false;
         public bool DisableReboot { get; set; } = true;
+        public bool DisableIniClear { get; set; } = true;
+        public bool FixDebugInput { get; set; } = true;
         public bool FixCheckAuth { get; set; } = false;
         public bool ForceAsServer { get; set; } = false;
         public bool SkipCakeHashCheck { get; set; } = false;
@@ -66,9 +69,10 @@ public class MainConfig
     
     public class ModSettingConfig
     {
+        public bool SafeMode { get; set; } = false;
         public bool ShowInfo { get; set; } = true;
         public bool ShowPanel { get; set; } = true;
-        public bool SafeMode { get; set; } = false;
+        public WebServerConfig WebServer { get; set; } = new WebServerConfig();
     }
     
     public class ChangeGameSettingsConfig
@@ -136,5 +140,14 @@ public class MainConfig
     {
         public bool Enable { get; set; } = true;
         public bool PrintToConsole { get; set; } = true;
+    }
+
+    public class WebServerConfig
+    {
+        public bool Enable { get; set; } = false;
+        public string Host { get; set; } = "127.0.0.1";
+        public int Port { get; set; } = 8080;
+        public string Token { get; set; } = "";
+        public bool PrintDebugLog { get; set; } = false;
     }
 }

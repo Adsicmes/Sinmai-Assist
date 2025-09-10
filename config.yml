@@ -1,4 +1,5 @@
 ﻿common:
+  autoBackupData: false
   infinityTimer: false
   infinityTimerLegacy: false
   disableMask: false
@@ -62,6 +63,8 @@ fix:
   disableEnvironmentCheck: false
   disableEncryption: false
   disableReboot: false
+  disableIniClear: false
+  fixDebugInput: false
   fixCheckAuth: false
   forceAsServer: false
   skipCakeHashCheck: false
@@ -74,7 +77,13 @@ fix:
     judgeTiming: 0.0
 
 modSetting:
+  safeMode: false
   showInfo: false
   showPanel: false
   logUnity: false
-  safeMode: false
+  webServer:
+    enable: false
+    host: "0.0.0.0"
+    port: 8080
+    token: ""
+    printDebugLog: false

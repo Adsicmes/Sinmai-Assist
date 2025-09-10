@@ -1,4 +1,5 @@
 ﻿common:
+  autoBackupData: false # 自动备份玩家数据
   infinityTimer: false # 无限计时器
   infinityTimerLegacy: false # 无限计时器(传统方案)
   disableMask: false # 禁用遮罩
@@ -62,6 +63,8 @@ fix:
   disableEnvironmentCheck: false # 禁用运行环境检查
   disableEncryption: false # 禁用加密
   disableReboot: false # 禁用自动重启
+  disableIniClear: false # 禁止程序清除ini配置文件文件
+  fixDebugInput: false # 修复DebugInput
   fixCheckAuth: false # 修复CheckAuth
   forceAsServer: false # 强制以服务器模式运行
   skipCakeHashCheck: false # 跳过Cake.dll Hash检查
@@ -74,7 +77,13 @@ fix:
     judgeTiming: 0.0 # 判定延迟(单位:帧)
 
 modSetting:
+  safeMode: false # 启用安全模式
   showInfo: false # 显示信息
   showPanel: false # 显示面板
   logUnity: false # 显示Unity日志到控制台
-  safeMode: false # 启用安全模式
+  webServer: # Web服务
+    enable: false # 是否启用
+    host: "0.0.0.0" # 地址
+    port: 8080 # 端口
+    token: "" # token
+    printDebugLog: false # 输出调试日志

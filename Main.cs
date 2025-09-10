@@ -2,9 +2,7 @@
 using MelonLoader;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using SinmaiAssist.Attributes;
@@ -34,7 +32,10 @@ namespace SinmaiAssist
         private MainGUI _mainGUI;
         private static bool _isPatchFailed = false;
         private static ConfigManager<MainConfig> _mainConfigManager;
+        private static ConfigManager<KeyBindConfig> _keyBindConfigManager;
+        private static WebServer.WebServer _webServer;
         public static MainConfig MainConfig;
+        public static KeyBindConfig KeyBindConfig;
         public static string GameID = "Unknown";
         public static uint GameVersion = 00000;
 
@@ -53,8 +54,11 @@ namespace SinmaiAssist
             // 加载配置文件
             try
             {
+                var keyBindCoverter = new KeyBindConfig.Converter();
                 _mainConfigManager = new ConfigManager<MainConfig>($"./{BuildInfo.Name}/config.yml");
+                _keyBindConfigManager = new ConfigManager<KeyBindConfig>($"./{BuildInfo.Name}/keybind.yml", keyBindCoverter);
                 MainConfig = _mainConfigManager.GetConfig();
+                KeyBindConfig = _keyBindConfigManager.GetConfig();
                 DummyLoginPanel.DummyUserId = MainConfig.Common.DummyLogin.DefaultUserId.ToString();
                 DebugPanel.UnityLogger = MainConfig.Common.UnityLogger.Enable;
                 MelonLogger.Msg("Config Load Complete.");
@@ -63,6 +67,17 @@ namespace SinmaiAssist
             {
                 MelonLogger.Error($"Error initializing mod config: \n{e}");
                 return;
+            }
+            
+            // 初始化WebServer
+            if (MainConfig.ModSetting.WebServer.Enable)
+            {
+                _webServer = new WebServer.WebServer(
+                    MainConfig.ModSetting.WebServer.Host,
+                    MainConfig.ModSetting.WebServer.Port,
+                    MainConfig.ModSetting.WebServer.Token
+                );
+                _webServer.Start();
             }
 
             // 输出设备摄像头列表
@@ -145,6 +160,7 @@ namespace SinmaiAssist
             }
 
             // Common
+            if (MainConfig.Common.AutoBackupData) Patch(typeof(AutoBackupData));
             if (MainConfig.Common.InfinityTimer) Patch(typeof(InfinityTimer));
             if (MainConfig.Common.InfinityTimerLegacy) Patch(typeof(InfinityTimerLegacy));
             if (MainConfig.Common.DisableBackground) Patch(typeof(DisableBackground));
@@ -152,7 +168,8 @@ namespace SinmaiAssist
             if (MainConfig.Common.SinglePlayer.Enable) Patch(typeof(SinglePlayer));
             if (MainConfig.Common.ForceQuickRetry) Patch(typeof(ForceQuickRetry));
             if (MainConfig.Common.ForwardATouchRegionToButton) Patch(typeof(ForwardATouchRegionToButton));
-            if (MainConfig.Common.QuickBoot) Patch(typeof(QuickBoot));
+            // 存在资源加载问题，现已禁用
+            // if (MainConfig.Common.QuickBoot) Patch(typeof(QuickBoot)); 
             if (MainConfig.Common.BlockCoin) Patch(typeof(BlockCoin));
             if (MainConfig.Common.SkipWarningScreen) Patch(typeof(SkipWarningScreen));
             if (MainConfig.Common.SkipFade) Patch(typeof(SkipFade));
@@ -167,6 +184,8 @@ namespace SinmaiAssist
             if (MainConfig.Fix.DisableEnvironmentCheck) Patch(typeof(DisableEnvironmentCheck));
             if (MainConfig.Fix.DisableEncryption) Patch(typeof(DisableEncryption));
             if (MainConfig.Fix.DisableReboot) Patch(typeof(DisableReboot));
+            if (MainConfig.Fix.DisableIniClear) Patch(typeof(DisableIniClear));
+            if (MainConfig.Fix.FixDebugInput) Patch(typeof(FixDebugInput));
             if (MainConfig.Fix.FixCheckAuth) Patch(typeof(FixCheckAuth));
             if (MainConfig.Fix.ForceAsServer) Patch(typeof(ForceAsServer));
             if (MainConfig.Fix.SkipCakeHashCheck) Patch(typeof(SkipCakeHashCheck));
@@ -190,13 +209,16 @@ namespace SinmaiAssist
             if (MainConfig.Cheat.RewriteLoginBonusStamp.Enable) Patch(typeof(RewriteLoginBonusStamp));
 
             // 默认加载项
-            Patch(typeof(FixDebugInput));
             Patch(typeof(PrintUserData));
             Patch(typeof(InputManager));
             Patch(typeof(GameMessageManager));
             
             if(_isPatchFailed) PatchFailedWarn();
             MelonLogger.Msg("Loading completed");
+        }
+        public override void OnApplicationQuit()
+        {
+            if (MainConfig.ModSetting.WebServer.Enable && _webServer.IsRunning()) _webServer.Stop();
         }
 
         public override void OnGUI()
@@ -272,7 +294,16 @@ namespace SinmaiAssist
                             "\r\n=================================================================" +
                             $"\r\n Version: {BuildInfo.Version} ({BuildInfo.CommitHash}) Build Date: {BuildInfo.BuildDate}" +
                             $"\r\n Author: {BuildInfo.Author}");
-            MelonLogger.Warning("This is a cheat mod. Use at your own risk!");
+            MelonLogger.Warning("\n" +
+                                "\r\n=================================================================" +
+                                "\r\n这是一个作弊Mod，后果自负,Mod仅限测试使用，禁止用于其他操作!" +
+                                "\r\nThis is a cheat mod. Use at your own risk!" +
+                                "\r\n这是一个免费的开源Mod项目，禁止倒卖!" +
+                                "\r\nThis is a free and open-source mod. Resale is strictly prohibited." +
+                                "\r\n如果你花了钱买了这个Mod，那你很愚蠢。" +
+                                "\r\nIf you paid for this mod, you are stupid." +
+                                "\r\n================================================================="
+                                );
         }
 
         private static void PatchFailedWarn()
